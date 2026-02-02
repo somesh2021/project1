@@ -1,0 +1,1320 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Varalika: The Epic</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=IM+Fell+DW+Pica&family=IM+Fell+English:ital@0;1&family=Texturina:ital,opsz,wght@0,12..72,100..900;1,12..72,100..900&display=swap" rel="stylesheet">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            overflow: hidden;
+            width: 100vw;
+            height: 100vh;
+            cursor: default;
+        }
+
+        #custom-cursor {
+            position: fixed;
+            width: 60px;
+            height: 60px;
+            pointer-events: none;
+            z-index: 9999;
+            background-image: url('images/lens-wipes-image.png');
+            background-size: contain;
+            background-repeat: no-repeat;
+            background-position: center;
+            transform: translate(-30px, -30px);
+            display: none;
+        }
+
+        #game-container {
+            cursor: none;
+        }
+
+        #game-container {
+            width: 100%;
+            height: 100%;
+            background-image: url('images/baahubali-background2.png');
+            background-size: cover;
+            background-position: center;
+            position: relative;
+        }
+
+        #instructions-container {
+            position: absolute;
+            top: 15px;
+            right: 15px;
+            background-image: url('images/parchment.jpg');
+            background-size: cover;
+            background-position: center;
+            padding: 12px 20px;
+            border-radius: 8px;
+            text-align: center;
+            z-index: 100;
+            border: 3px solid #5d3a1a;
+            box-shadow: 0 0 15px rgba(0, 0, 0, 0.5);
+            font-family: 'IM Fell DW Pica', serif;
+            max-width: 280px;
+        }
+
+        #instructions-container h2 {
+            font-size: 1.1rem;
+            margin-bottom: 5px;
+            color: #2d1810;
+            font-family: 'IM Fell English', serif;
+        }
+
+        #instructions-container p {
+            font-size: 0.85rem;
+            color: #2d1810;
+            margin: 0 0 8px 0;
+            line-height: 1.3;
+        }
+
+        #stats {
+            display: flex;
+            gap: 10px;
+            justify-content: center;
+        }
+
+        #stats span {
+            font-size: 0.95rem;
+            color: #2d1810;
+            font-weight: bold;
+        }
+
+        .device {
+            position: absolute;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .device img {
+            width: 100%;
+            height: 100%;
+            object-fit: contain;
+        }
+
+        .device-screen {
+            position: absolute;
+            display: flex;
+            flex-wrap: wrap;
+            align-items: center;
+            justify-content: center;
+            gap: 5px;
+            padding: 5px;
+        }
+
+        .fingerprint {
+            cursor: pointer;
+            transition: transform 0.1s, opacity 0.2s;
+            position: absolute;
+        }
+
+        .fingerprint:hover {
+            transform: scale(1.1);
+        }
+
+        .fingerprint.cleaned {
+            opacity: 0;
+            pointer-events: none;
+            animation: fingerprintPop 0.4s ease-out forwards;
+        }
+
+        @keyframes fingerprintPop {
+            0% { transform: scale(1) rotate(0deg); opacity: 1; }
+            100% { transform: scale(0.3) rotate(360deg) translateY(-100px); opacity: 0; }
+        }
+
+        #person-overlay {
+            position: fixed;
+            width: 50px;
+            height: 50px;
+            background-image: url('images/person-image.png');
+            background-size: contain;
+            background-repeat: no-repeat;
+            background-position: center;
+            display: none;
+            z-index: 150;
+            pointer-events: none;
+            transition: none;
+        }
+
+        .hand-left, .hand-right {
+            position: fixed;
+            width: 30px;
+            height: 30px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            pointer-events: none;
+            z-index: 150;
+            font-size: 24px;
+        }
+
+        .hand-left {
+            left: -30px;
+        }
+
+        .hand-right {
+            right: -30px;
+        }
+
+        #game-over, #win-screen, #start-screen {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.85);
+            display: none;
+            align-items: center;
+            justify-content: center;
+            flex-direction: column;
+            z-index: 300;
+        }
+
+        #start-screen {
+            display: flex;
+            background-image: url('images/parchment.jpg');
+            background-size: cover;
+            background-position: center;
+            cursor: default;
+        }
+
+        #parchment-container {
+            background: transparent;
+            padding: 60px;
+            max-width: 700px;
+            width: 90%;
+            position: relative;
+            font-family: 'IM Fell DW Pica', serif;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 40px;
+            z-index: 302;
+        }
+
+        .intro-side-image {
+            position: fixed;
+            top: 50%;
+            transform: translateY(-50%);
+            width: 500px;
+            height: auto;
+            z-index: 301;
+        }
+
+        .intro-side-image.left {
+            left: 0;
+        }
+
+        .intro-side-image.right {
+            right: 0;
+        }
+
+        .intro-side-image img {
+            width: 100%;
+            height: auto;
+            max-height: 90vh;
+            object-fit: contain;
+        }
+
+        .intro-content {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            width: 100%;
+        }
+
+        #parchment-container::before {
+            display: none;
+        }
+
+        #parchment-container h2 {
+            color: #000000;
+            font-size: 3rem;
+            margin-bottom: 0;
+            text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.2);
+            font-family: 'IM Fell English', serif;
+            text-align: center;
+            border-bottom: 2px solid #8b5a2b;
+            padding-bottom: 15px;
+            width: 100%;
+        }
+
+        #parchment-container .story-text {
+            color: #2d1810;
+            font-size: 1.2rem;
+            line-height: 1.8;
+            text-align: center;
+            margin-bottom: 30px;
+            max-width: 600px;
+        }
+
+        #speaker-btn {
+            position: absolute;
+            top: 20px;
+            right: 20px;
+            background: #8b5a2b;
+            border: 2px solid #5d3a1a;
+            border-radius: 50%;
+            width: 50px;
+            height: 50px;
+            font-size: 1.5rem;
+            cursor: pointer;
+            display: none;
+            align-items: center;
+            justify-content: center;
+            transition: transform 0.2s, background 0.2s;
+            z-index: 10;
+        }
+
+        #speaker-btn:hover {
+            transform: scale(1.1);
+            background: #6d4a2b;
+        }
+
+        #speaker-btn.visible {
+            display: flex;
+        }
+
+        .enter-btn, .play-audio-btn {
+            background: linear-gradient(135deg, #8b5a2b, #5d3a1a);
+            color: #f4e4c1;
+            border: 2px solid #3d2817;
+            padding: 15px 50px;
+            font-size: 1.5rem;
+            font-family: 'Georgia', serif;
+            border-radius: 10px;
+            cursor: pointer;
+            transition: transform 0.2s, box-shadow 0.2s;
+            box-shadow: 0 5px 20px rgba(0, 0, 0, 0.4);
+            display: block;
+            margin: 0 auto;
+        }
+
+        .enter-btn:hover, .play-audio-btn:hover {
+            transform: scale(1.05);
+            box-shadow: 0 8px 30px rgba(0, 0, 0, 0.6);
+        }
+
+        .enter-btn {
+            display: none;
+        }
+
+        .enter-btn.visible {
+            display: block;
+        }
+
+        #game-over h2, #win-screen h2, #start-screen h2 {
+            color: #000000;
+            font-size: 3rem;
+            margin-bottom: 20px;
+            text-shadow: 0 0 20px rgba(0, 0, 0, 0.3);
+        }
+
+        #game-over p, #start-screen p {
+            color: white;
+            font-size: 1.3rem;
+            margin-bottom: 30px;
+            text-align: center;
+            max-width: 500px;
+        }
+
+        .game-btn {
+            background: linear-gradient(135deg, #8b5a2b, #5d3a1a);
+            color: white;
+            border: none;
+            padding: 15px 40px;
+            font-size: 1.3rem;
+            border-radius: 30px;
+            cursor: pointer;
+            transition: transform 0.2s, box-shadow 0.2s;
+            box-shadow: 0 5px 20px rgba(0, 0, 0, 0.5);
+        }
+
+        .game-btn:hover {
+            transform: scale(1.05);
+            box-shadow: 0 8px 30px rgba(0, 0, 0, 0.7);
+        }
+
+        #win-screen {
+            background-image: url('images/parchment.jpg');
+            background-size: cover;
+            background-position: center;
+        }
+
+        #win-container {
+            background: transparent;
+            padding: 50px 60px;
+            max-width: 800px;
+            width: 90%;
+            border: 4px solid #5d3a1a;
+            border-radius: 15px;
+            box-shadow: 0 10px 40px rgba(0, 0, 0, 0.8);
+            font-family: 'IM Fell DW Pica', serif;
+        }
+
+        #win-screen h2 {
+            color: #000000;
+            font-size: 3rem;
+            margin-bottom: 30px;
+            text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.2);
+            font-family: 'IM Fell English', serif;
+            text-align: center;
+            border-bottom: 2px solid #8b5a2b;
+            padding-bottom: 15px;
+        }
+
+        #win-screen .win-text {
+            color: #2d1810;
+            font-size: 1.3rem;
+            line-height: 1.9;
+            text-align: center;
+            margin-bottom: 40px;
+        }
+
+        .win-buttons {
+            display: flex;
+            gap: 30px;
+            justify-content: center;
+        }
+
+        .win-btn {
+            background: linear-gradient(135deg, #8b5a2b, #5d3a1a);
+            color: #f4e4c1;
+            border: 2px solid #3d2817;
+            padding: 15px 50px;
+            font-size: 1.5rem;
+            font-family: 'Georgia', serif;
+            border-radius: 10px;
+            cursor: pointer;
+            transition: transform 0.2s, box-shadow 0.2s;
+            box-shadow: 0 5px 20px rgba(0, 0, 0, 0.4);
+        }
+
+        .win-btn:hover {
+            transform: scale(1.05);
+            box-shadow: 0 8px 30px rgba(0, 0, 0, 0.6);
+        }
+
+        @keyframes pulse {
+            0%, 100% { transform: scale(1); }
+            50% { transform: scale(1.1); }
+        }
+
+        #timer-bar {
+            position: absolute;
+            bottom: 20px;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 80%;
+            max-width: 600px;
+            height: 30px;
+            background: rgba(0, 0, 0, 0.7);
+            border-radius: 15px;
+            overflow: hidden;
+            border: 2px solid #8b5a2b;
+        }
+
+        #timer-fill {
+            height: 100%;
+            background: linear-gradient(90deg, #8b5a2b, #5d3a1a);
+            transition: width 0.1s linear;
+            width: 100%;
+        }
+
+        .tv-device { width: 240px; height: 200px; }
+        .monitor-device { width: 200px; height: 160px; }
+        .phone-device { width: 90px; height: 150px; }
+
+        /* Terms and Conditions Screen */
+        #terms-screen {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            display: none;
+            align-items: center;
+            justify-content: center;
+            z-index: 400;
+        }
+
+        #terms-screen.active {
+            display: flex;
+        }
+
+        #terms-backdrop {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            backdrop-filter: blur(10px);
+            background: rgba(0, 0, 0, 0.5);
+            z-index: 401;
+        }
+
+        #terms-container {
+            background-image: url('images/parchment.jpg');
+            background-size: cover;
+            background-position: center;
+            padding: 50px;
+            max-width: 700px;
+            width: 90%;
+            max-height: 85vh;
+            overflow-y: auto;
+            border-radius: 15px;
+            border: 4px solid #5d3a1a;
+            box-shadow: 0 10px 40px rgba(0, 0, 0, 0.8);
+            position: relative;
+            z-index: 402;
+            font-family: 'IM Fell DW Pica', serif;
+        }
+
+        #terms-container h2 {
+            color: #000000;
+            font-size: 2.5rem;
+            margin-bottom: 20px;
+            text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.2);
+            font-family: 'IM Fell English', serif;
+            text-align: center;
+            border-bottom: 2px solid #8b5a2b;
+            padding-bottom: 15px;
+        }
+
+        #terms-container ol {
+            color: #2d1810;
+            font-size: 1.1rem;
+            line-height: 1.8;
+            margin: 30px 0;
+            padding-left: 25px;
+        }
+
+        #terms-container li {
+            margin-bottom: 20px;
+        }
+
+        #name-input-container {
+            margin: 30px 0;
+            text-align: center;
+        }
+
+        #name-input-container label {
+            color: #2d1810;
+            font-size: 1.2rem;
+            display: block;
+            margin-bottom: 10px;
+            font-weight: bold;
+        }
+
+        #player-name {
+            width: 80%;
+            max-width: 400px;
+            padding: 12px 20px;
+            font-size: 1.1rem;
+            font-family: 'IM Fell DW Pica', serif;
+            border: 3px solid #5d3a1a;
+            border-radius: 8px;
+            background: rgba(255, 255, 255, 0.9);
+            color: #2d1810;
+            text-align: center;
+        }
+
+        #player-name:focus {
+            outline: none;
+            border-color: #8b5a2b;
+            background: rgba(255, 255, 255, 1);
+        }
+
+        #agree-btn {
+            background: linear-gradient(135deg, #8b5a2b, #5d3a1a);
+            color: #f4e4c1;
+            border: 2px solid #3d2817;
+            padding: 15px 50px;
+            font-size: 1.5rem;
+            font-family: 'Georgia', serif;
+            border-radius: 10px;
+            cursor: pointer;
+            transition: transform 0.2s, box-shadow 0.2s;
+            box-shadow: 0 5px 20px rgba(0, 0, 0, 0.4);
+            display: block;
+            margin: 0 auto;
+        }
+
+        #agree-btn:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+            transform: none;
+        }
+
+        #agree-btn:not(:disabled):hover {
+            transform: scale(1.05);
+            box-shadow: 0 8px 30px rgba(0, 0, 0, 0.6);
+        }
+
+        #acceptance-screen {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: #000;
+            display: none;
+            align-items: center;
+            justify-content: center;
+            z-index: 400;
+        }
+
+        #acceptance-screen.visible {
+            display: flex;
+        }
+
+        #win-video {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+        }
+
+        .tv-screen { width: 75%; height: 60%; top: 10%; }
+        .monitor-screen { width: 80%; height: 65%; top: 8%; }
+        .phone-screen { width: 85%; height: 75%; top: 8%; }
+
+        #instructions {
+            color: #aaa;
+            font-size: 0.9rem;
+            margin-top: 20px;
+            text-align: center;
+        }
+    </style>
+</head>
+<body>
+    <div id="custom-cursor"></div>
+
+    <div id="game-container">
+        <div id="instructions-container">
+            <h2>Varalika: The Epic Instructions</h2>
+            <p>Wipe away the fingerprints before Varalika covers everything by clicking on them with Zeiss Lens Wipes!</p>
+            <div id="stats">
+                <span>Fingerprints Remaining: <span id="fingerprint-count">0</span></span>
+            </div>
+        </div>
+
+        <div id="devices-container"></div>
+
+        <div id="person-overlay">
+            <div class="hand-left">👐</div>
+            <div class="hand-right">👐</div>
+        </div>
+
+        <audio id="background-music" loop>
+            <source src="audio/baahubali-audio-final.mov" type="audio/mp4">
+        </audio>
+    </div>
+
+    <div id="start-screen">
+        <div class="intro-side-image left">
+            <img src="images/baahubali-warrior.png" alt="Baahubali Warrior">
+        </div>
+        <div id="parchment-container">
+            <button id="speaker-btn" onclick="playTeluguAudio()">🔊</button>
+            <h2>The Story</h2>
+            <p class="story-text">
+                Once upon a time, there lived a great warrior named Someshwar Ramesh Babu. He fought many battles across seas and lands to protect his people. One such battle was against the dangerous and fearsome Varalika. She deceived him with her beauty and left her greasy handprints all over the kingdom. With the power of Zeiss Lens Wipes, the great warrior Someshwar cleansed the kingdom and permanently removed the grease from Varalika's hands. Now you have the amazing opportunity to recreate this battle and achieve victory, just as the great warrior Someshwar once did. Beware of Varalika and do not fall prey to her beauty!
+            </p>
+            <button class="play-audio-btn" onclick="playIntroAudio()">🎵 Play Audio 🎵</button>
+            <button class="enter-btn" onclick="startGame()">ENTER</button>
+        </div>
+        <div class="intro-side-image right">
+            <img src="images/kalakeya.png" alt="Kalakeya">
+        </div>
+    </div>
+
+    <audio id="telugu-audio">
+        <source src="audio/telugu-audio-final.mov" type="audio/mp4">
+    </audio>
+
+    <div id="game-over">
+        <h2>😢 The Person Won!</h2>
+        <p>Too many fingerprints! The screens are covered... Want to try again?</p>
+        <button class="game-btn" onclick="startGame()">Try Again! 💪</button>
+    </div>
+
+    <div id="win-screen">
+        <div id="win-container">
+            <h2>CONGRATULATIONS!!!</h2>
+            <p class="win-text">
+                You have defeated the Dangerous and Mighty Varalika and have been rewarded with the forever in a lifetime opportunity of being the VALENTINE of the modern day reincarnation of the Great and Ferocious Warrior Someshwar Ramesh Babu!!! Should you choose to accept this offer, you shall be his equal part in the highs and lows of every life to come!
+            </p>
+            <div class="win-buttons">
+                <button class="win-btn" onclick="acceptValentine()">YES</button>
+                <button class="win-btn" onclick="rejectValentine()">NO</button>
+            </div>
+        </div>
+    </div>
+
+    <div id="terms-screen">
+        <div id="terms-backdrop"></div>
+        <div id="terms-container">
+            <h2>Terms and Conditions</h2>
+            <ol>
+                <li>I agree to not sue Someshwar Ramesh Babu for any physical and/or emotional trauma I may get from playing this game.</li>
+                <li>I agree to not complain about any creative liberties that may have been taken to make this game a reality.</li>
+                <li>I agree to the disclaimer of the fact that this story was based on fact. Any similarity with actual events, locales, or persons was purely coincidental and I agree not to sue Someshwar Ramesh Babu for any issues related to this.</li>
+                <li>I agree to accept any reward that I may receive from winning this game.</li>
+                <li>I agree to not ask for any product from the company Chanel Limited as a reward for winning this game, as we have a strict no-competition agreement with them.</li>
+            </ol>
+            <div id="name-input-container">
+                <label for="player-name">Enter Your Name to Proceed:</label>
+                <input type="text" id="player-name" placeholder="Your name here..." oninput="checkNameInput()">
+            </div>
+            <button id="agree-btn" disabled onclick="acceptTerms()">I Agree</button>
+        </div>
+    </div>
+
+    <div id="acceptance-screen">
+        <video id="win-video" controls>
+            <source src="video/win_screen_video.mp4" type="video/mp4">
+        </video>
+    </div>
+
+    <script>
+        // Game configuration
+        const CONFIG = {
+            gameTime: 60, // seconds - for tracking game length
+            devices: {
+                tv: { count: 2, fingerprintsMin: 5, fingerprintsMax: 8 },
+                monitor: { count: 4, fingerprintsMin: 4, fingerprintsMax: 6 },
+                phone: { count: 5, fingerprintsMin: 3, fingerprintsMax: 5 }
+            },
+            speedThreshold: 500, // ms between clicks to trigger "too fast"
+            speedClickCount: 3, // number of fast clicks to trigger person
+            personDelay: 2000, // how long person stays on screen
+            newFingerprintsMin: 1,
+            newFingerprintsMax: 3,
+            fingerprintSize: { min: 30, max: 50 },
+            personMoverSpeed: 3000, // ms between person adding fingerprints (base speed)
+            personMoverSpeedHard: 1500, // ms during hard difficulty
+            personMoverSpeedEasy: 5000, // ms during easy difficulty
+            personSize: 50, // size of person image
+            musicDuration: 150 // approximate duration of background music in seconds
+        };
+
+        let gameState = {
+            totalFingerprints: 0,
+            cleanedFingerprints: 0,
+            timeLeft: CONFIG.gameTime,
+            isPlaying: false,
+            lastClickTime: 0,
+            fastClickCount: 0,
+            personActive: false,
+            timerInterval: null,
+            devices: [],
+            personTriggeredOnce: false,
+            personTriggerCount: 0,
+            personX: 0,
+            personY: 0,
+            personVelX: 2,
+            personVelY: 2,
+            personMoveInterval: null,
+            personFingerprintInterval: null,
+            gameLost: false,
+            musicStartTime: 0,
+            currentDifficulty: 'normal' // 'normal', 'hard', 'easy'
+        };
+
+        const devicesContainer = document.getElementById('devices-container');
+        const fingerprintCountEl = document.getElementById('fingerprint-count');
+        const timeLeftEl = document.getElementById('time-left');
+        const timerFill = document.getElementById('timer-fill');
+        const personOverlay = document.getElementById('person-overlay');
+        const gameOverScreen = document.getElementById('game-over');
+        const winScreen = document.getElementById('win-screen');
+        const startScreen = document.getElementById('start-screen');
+
+        function randomBetween(min, max) {
+            return Math.floor(Math.random() * (max - min + 1)) + min;
+        }
+
+        function createDevice(type, index) {
+            const device = document.createElement('div');
+            device.className = `device ${type}-device`;
+            device.id = `${type}-${index}`;
+
+            const img = document.createElement('img');
+            const imgSrc = {
+                tv: 'images/tv-image.png',
+                monitor: 'images/computer-monitor-image.png',
+                phone: 'images/smartphone-image.png'
+            };
+            img.src = imgSrc[type];
+            img.alt = type;
+
+            const screen = document.createElement('div');
+            screen.className = `device-screen ${type}-screen`;
+
+            device.appendChild(img);
+            device.appendChild(screen);
+
+            return { element: device, screen, type };
+        }
+
+        function positionDeviceWithoutOverlap(deviceElement, type) {
+            const sizes = {
+                tv: { width: 180, height: 150 },
+                monitor: { width: 140, height: 120 },
+                phone: { width: 60, height: 110 }
+            };
+
+            const size = sizes[type];
+            let positioned = false;
+            let attempts = 0;
+
+            // Calculate forbidden zone dynamically based on viewport
+            // The title "VARALIKA THE EPIC" is roughly in the center of the background
+            const viewportWidth = window.innerWidth;
+            const viewportHeight = window.innerHeight;
+            
+            // Forbidden zone is the center area where the title is
+            // Roughly 40% of the screen width centered, and from 15% to 55% of screen height
+            const forbiddenZone = {
+                left: viewportWidth * 0.25,
+                top: viewportHeight * 0.12,
+                right: viewportWidth * 0.75,
+                bottom: viewportHeight * 0.55
+            };
+
+            // Define allowed zones (edges of the screen)
+            const zones = [
+                // Left edge
+                { xMin: 10, xMax: forbiddenZone.left - size.width - 20, yMin: 120, yMax: viewportHeight - size.height - 80 },
+                // Right edge  
+                { xMin: forbiddenZone.right + 20, xMax: viewportWidth - size.width - 10, yMin: 120, yMax: viewportHeight - size.height - 80 },
+                // Bottom area (below the title)
+                { xMin: 10, xMax: viewportWidth - size.width - 10, yMin: forbiddenZone.bottom + 20, yMax: viewportHeight - size.height - 80 }
+            ];
+
+            while (!positioned && attempts < 100) {
+                // Pick a random allowed zone
+                const zone = zones[randomBetween(0, zones.length - 1)];
+                
+                // Skip invalid zones (where max < min)
+                if (zone.xMax < zone.xMin || zone.yMax < zone.yMin) {
+                    attempts++;
+                    continue;
+                }
+
+                const x = randomBetween(Math.max(10, zone.xMin), Math.max(zone.xMin, zone.xMax));
+                const y = randomBetween(Math.max(120, zone.yMin), Math.max(zone.yMin, zone.yMax));
+
+                deviceElement.style.left = x + 'px';
+                deviceElement.style.top = y + 'px';
+
+                // Check for overlaps with existing devices
+                const newRect = deviceElement.getBoundingClientRect();
+                let overlaps = false;
+
+                document.querySelectorAll('.device').forEach(existing => {
+                    if (existing !== deviceElement) {
+                        const existingRect = existing.getBoundingClientRect();
+                        if (!(newRect.right < existingRect.left - 15 ||
+                              newRect.left > existingRect.right + 15 ||
+                              newRect.bottom < existingRect.top - 15 ||
+                              newRect.top > existingRect.bottom + 15)) {
+                            overlaps = true;
+                        }
+                    }
+                });
+
+                if (!overlaps) {
+                    positioned = true;
+                }
+                attempts++;
+            }
+
+            // Fallback: place in bottom area if nothing worked
+            if (!positioned) {
+                const bottomY = randomBetween(Math.floor(viewportHeight * 0.6), viewportHeight - size.height - 80);
+                deviceElement.style.left = randomBetween(10, viewportWidth - size.width - 10) + 'px';
+                deviceElement.style.top = bottomY + 'px';
+            }
+        }
+
+        function createFingerprint(screenElement, deviceType) {
+            const fingerprint = document.createElement('img');
+            fingerprint.src = 'images/fingerprint-image.png';
+            fingerprint.className = 'fingerprint';
+            
+            const size = randomBetween(CONFIG.fingerprintSize.min, CONFIG.fingerprintSize.max);
+            fingerprint.style.width = size + 'px';
+            fingerprint.style.height = size + 'px';
+            fingerprint.style.opacity = randomBetween(60, 90) / 100;
+            
+            // Random position within screen
+            const screenRect = screenElement.getBoundingClientRect();
+            const maxX = screenElement.offsetWidth - size;
+            const maxY = screenElement.offsetHeight - size;
+            
+            fingerprint.style.left = randomBetween(0, Math.max(0, maxX)) + 'px';
+            fingerprint.style.top = randomBetween(0, Math.max(0, maxY)) + 'px';
+            fingerprint.style.transform = `rotate(${randomBetween(0, 360)}deg)`;
+
+            fingerprint.addEventListener('click', (e) => {
+                e.stopPropagation();
+                cleanFingerprint(fingerprint);
+            });
+
+            screenElement.appendChild(fingerprint);
+            gameState.totalFingerprints++;
+            updateUI();
+
+            return fingerprint;
+        }
+
+        function cleanFingerprint(fingerprint) {
+            if (!gameState.isPlaying || gameState.gameLost) return;
+            if (fingerprint.classList.contains('cleaned')) return;
+
+            // Clean the fingerprint
+            fingerprint.classList.add('cleaned');
+            gameState.cleanedFingerprints++;
+            updateUI();
+
+            // Check for win
+            if (gameState.cleanedFingerprints >= gameState.totalFingerprints && gameState.totalFingerprints > 0) {
+                winGame();
+            }
+        }
+
+        function updatePersonPosition() {
+            const personOverlay = document.getElementById('person-overlay');
+            const handLeft = document.querySelector('.hand-left');
+            const handRight = document.querySelector('.hand-right');
+
+            // Update position
+            gameState.personX += gameState.personVelX;
+            gameState.personY += gameState.personVelY;
+
+            // Bounce off walls
+            const maxX = window.innerWidth - CONFIG.personSize;
+            const maxY = window.innerHeight - CONFIG.personSize;
+
+            if (gameState.personX <= 0 || gameState.personX >= maxX) {
+                gameState.personVelX *= -1;
+                gameState.personX = Math.max(0, Math.min(maxX, gameState.personX));
+            }
+
+            if (gameState.personY <= 80 || gameState.personY >= maxY) {
+                gameState.personVelY *= -1;
+                gameState.personY = Math.max(80, Math.min(maxY, gameState.personY));
+            }
+
+            personOverlay.style.left = gameState.personX + 'px';
+            personOverlay.style.top = gameState.personY + 'px';
+
+            // Update hand positions to follow
+            if (handLeft) {
+                handLeft.style.left = (gameState.personX - 35) + 'px';
+                handLeft.style.top = (gameState.personY + 10) + 'px';
+            }
+            if (handRight) {
+                handRight.style.left = (gameState.personX + 50) + 'px';
+                handRight.style.top = (gameState.personY + 10) + 'px';
+            }
+
+            // Check if we've exceeded total fingerprints (person wins)
+            if (gameState.totalFingerprints > 100) {
+                gameLost();
+            }
+        }
+
+        function personAddFingerprints() {
+            if (!gameState.isPlaying || gameState.gameLost) return;
+
+            // Calculate progress percentage (how close to finishing)
+            const progressPercent = gameState.totalFingerprints > 0 
+                ? (gameState.cleanedFingerprints / gameState.totalFingerprints) * 100 
+                : 0;
+
+            // Calculate music time elapsed
+            const music = document.getElementById('background-music');
+            const musicTimeElapsed = music.currentTime;
+            const musicTimeRemaining = CONFIG.musicDuration - musicTimeElapsed;
+
+            // Dynamic difficulty based on progress and music
+            let fingerprintsToAdd;
+            let difficulty;
+
+            // If music is ending (last 30 seconds), ease up
+            if (musicTimeRemaining < 30) {
+                difficulty = 'easy';
+                fingerprintsToAdd = randomBetween(1, 2);
+            }
+            // If progress is between 60-85%, make it harder
+            else if (progressPercent >= 60 && progressPercent < 85) {
+                difficulty = 'hard';
+                fingerprintsToAdd = randomBetween(2, 4);
+            }
+            // If progress is 85%+, make it very hard
+            else if (progressPercent >= 85) {
+                difficulty = 'very-hard';
+                fingerprintsToAdd = randomBetween(3, 5);
+            }
+            // Normal difficulty
+            else {
+                difficulty = 'normal';
+                fingerprintsToAdd = randomBetween(CONFIG.newFingerprintsMin, CONFIG.newFingerprintsMax);
+            }
+
+            // Update difficulty state and adjust speed if needed
+            if (gameState.currentDifficulty !== difficulty) {
+                gameState.currentDifficulty = difficulty;
+                adjustPersonSpeed();
+            }
+
+            // Find devices near the person's current position
+            const personCenterX = gameState.personX + CONFIG.personSize / 2;
+            const personCenterY = gameState.personY + CONFIG.personSize / 2;
+            const detectionRadius = 80; // Only add to very nearby devices
+
+            // Find nearby devices ONLY
+            let nearbyDevices = gameState.devices.filter(device => {
+                const deviceRect = device.screen.getBoundingClientRect();
+                const deviceCenterX = deviceRect.left + deviceRect.width / 2;
+                const deviceCenterY = deviceRect.top + deviceRect.height / 2;
+                const distance = Math.sqrt(
+                    Math.pow(personCenterX - deviceCenterX, 2) + 
+                    Math.pow(personCenterY - deviceCenterY, 2)
+                );
+                return distance < detectionRadius;
+            });
+
+            // Only add fingerprints if there are nearby devices
+            if (nearbyDevices.length > 0) {
+                for (let i = 0; i < fingerprintsToAdd; i++) {
+                    const randomDevice = nearbyDevices[randomBetween(0, nearbyDevices.length - 1)];
+                    createFingerprint(randomDevice.screen, randomDevice.type);
+                }
+            }
+        }
+
+        function adjustPersonSpeed() {
+            // Clear existing interval
+            if (gameState.personFingerprintInterval) {
+                clearInterval(gameState.personFingerprintInterval);
+            }
+
+            // Set new speed based on difficulty
+            let speed;
+            switch (gameState.currentDifficulty) {
+                case 'easy':
+                    speed = CONFIG.personMoverSpeedEasy;
+                    break;
+                case 'hard':
+                    speed = CONFIG.personMoverSpeedHard;
+                    break;
+                case 'very-hard':
+                    speed = CONFIG.personMoverSpeedHard * 0.7; // Even faster
+                    break;
+                default:
+                    speed = CONFIG.personMoverSpeed;
+            }
+
+            // Restart interval with new speed
+            gameState.personFingerprintInterval = setInterval(() => {
+                if (gameState.isPlaying && !gameState.gameLost) {
+                    personAddFingerprints();
+                }
+            }, speed);
+        }
+
+        function updateUI() {
+            const remaining = gameState.totalFingerprints - gameState.cleanedFingerprints;
+            fingerprintCountEl.textContent = remaining;
+        }
+
+        function startPersonMover() {
+            const personOverlay = document.getElementById('person-overlay');
+            personOverlay.style.display = 'block';
+            
+            // Initialize person at random position
+            gameState.personX = randomBetween(100, window.innerWidth - CONFIG.personSize - 100);
+            gameState.personY = randomBetween(150, window.innerHeight - CONFIG.personSize - 100);
+            gameState.personVelX = randomBetween(-3, 3) || 2;
+            gameState.personVelY = randomBetween(-3, 3) || 2;
+
+            // Record music start time
+            const music = document.getElementById('background-music');
+            gameState.musicStartTime = Date.now();
+
+            // Smooth continuous movement
+            gameState.personMoveInterval = setInterval(() => {
+                if (gameState.isPlaying && !gameState.gameLost) {
+                    updatePersonPosition();
+                }
+            }, 30); // 30ms for smooth movement (roughly 33fps)
+
+            // Person adds fingerprints periodically (initial speed)
+            gameState.currentDifficulty = 'normal';
+            gameState.personFingerprintInterval = setInterval(() => {
+                if (gameState.isPlaying && !gameState.gameLost) {
+                    personAddFingerprints();
+                }
+            }, CONFIG.personMoverSpeed);
+        }
+
+        function gameLost() {
+            gameState.isPlaying = false;
+            gameState.gameLost = true;
+            clearInterval(gameState.personMoveInterval);
+            clearInterval(gameState.personFingerprintInterval);
+            document.getElementById('background-music').pause();
+            gameOverScreen.style.display = 'flex';
+            customCursor.style.display = 'none';
+        }
+
+        function winGame() {
+            gameState.isPlaying = false;
+            clearInterval(gameState.personMoveInterval);
+            clearInterval(gameState.personFingerprintInterval);
+            document.getElementById('background-music').pause();
+            document.getElementById('person-overlay').style.display = 'none';
+            winScreen.style.display = 'flex';
+            customCursor.style.display = 'none';
+        }
+
+        function startGame() {
+            // Hide start screen and show terms screen
+            startScreen.style.display = 'none';
+            const termsScreen = document.getElementById('terms-screen');
+            const nameInput = document.getElementById('player-name');
+            const agreeBtn = document.getElementById('agree-btn');
+            
+            // Reset terms screen
+            nameInput.value = '';
+            agreeBtn.disabled = true;
+            
+            termsScreen.classList.add('active');
+        }
+
+        function actuallyStartGame() {
+            // Reset state
+            gameState = {
+                totalFingerprints: 0,
+                cleanedFingerprints: 0,
+                timeLeft: CONFIG.gameTime,
+                isPlaying: true,
+                lastClickTime: 0,
+                fastClickCount: 0,
+                personActive: false,
+                timerInterval: null,
+                devices: [],
+                personTriggeredOnce: false,
+                personTriggerCount: 0,
+                personX: 0,
+                personY: 0,
+                personVelX: 2,
+                personVelY: 2,
+                personMoveInterval: null,
+                personFingerprintInterval: null,
+                gameLost: false,
+                musicStartTime: 0,
+                currentDifficulty: 'normal'
+            };
+
+            // Hide screens
+            gameOverScreen.style.display = 'none';
+            winScreen.style.display = 'none';
+
+            // Start background music
+            const music = document.getElementById('background-music');
+            music.currentTime = 0;
+            music.play().catch(() => {
+                // Audio autoplay might be blocked, that's ok
+            });
+
+            // Clear old devices
+            devicesContainer.innerHTML = '';
+
+            // Create devices
+            for (let i = 0; i < CONFIG.devices.tv.count; i++) {
+                const device = createDevice('tv', i);
+                devicesContainer.appendChild(device.element);
+                positionDeviceWithoutOverlap(device.element, 'tv');
+                gameState.devices.push(device);
+            }
+
+            for (let i = 0; i < CONFIG.devices.monitor.count; i++) {
+                const device = createDevice('monitor', i);
+                devicesContainer.appendChild(device.element);
+                positionDeviceWithoutOverlap(device.element, 'monitor');
+                gameState.devices.push(device);
+            }
+
+            for (let i = 0; i < CONFIG.devices.phone.count; i++) {
+                const device = createDevice('phone', i);
+                devicesContainer.appendChild(device.element);
+                positionDeviceWithoutOverlap(device.element, 'phone');
+                gameState.devices.push(device);
+            }
+
+            // Add fingerprints to each device
+            setTimeout(() => {
+                gameState.devices.forEach(device => {
+                    const config = CONFIG.devices[device.type];
+                    const fpCount = randomBetween(config.fingerprintsMin, config.fingerprintsMax);
+                    for (let i = 0; i < fpCount; i++) {
+                        createFingerprint(device.screen, device.type);
+                    }
+                });
+                updateUI();
+                startPersonMover();
+            }, 100);
+        }
+
+        // Prevent context menu
+        document.addEventListener('contextmenu', e => e.preventDefault());
+
+        // Play Telugu audio from intro
+        function playIntroAudio() {
+            const audio = document.getElementById('telugu-audio');
+            const playBtn = document.querySelector('.play-audio-btn');
+            const enterBtn = document.querySelector('.enter-btn');
+            const speakerBtn = document.getElementById('speaker-btn');
+            const skipBtn = document.getElementById('skip-audio-btn');
+            
+            audio.currentTime = 0;
+            audio.play().catch(() => {
+                console.log('Audio playback blocked');
+            });
+
+            // Hide play button
+            playBtn.style.display = 'none';
+
+            // Show enter button and speaker button when audio ends
+            audio.onended = function() {
+                enterBtn.classList.add('visible');
+                speakerBtn.classList.add('visible');
+                skipBtn.style.display = 'none';
+            };
+        }
+
+        // Skip audio
+        function skipAudio() {
+            const audio = document.getElementById('telugu-audio');
+            const playBtn = document.querySelector('.play-audio-btn');
+            const enterBtn = document.querySelector('.enter-btn');
+            const speakerBtn = document.getElementById('speaker-btn');
+            const skipBtn = document.getElementById('skip-audio-btn');
+            
+            audio.pause();
+            audio.currentTime = 0;
+            playBtn.style.display = 'none';
+            enterBtn.classList.add('visible');
+            speakerBtn.classList.add('visible');
+            skipBtn.style.display = 'none';
+        }
+
+        // Play Telugu audio
+        function playTeluguAudio() {
+            const audio = document.getElementById('telugu-audio');
+            audio.currentTime = 0;
+            audio.play().catch(() => {
+                console.log('Audio playback blocked');
+            });
+        }
+
+        // Check if name is entered to enable I Agree button
+        function checkNameInput() {
+            const nameInput = document.getElementById('player-name');
+            const agreeBtn = document.getElementById('agree-btn');
+            agreeBtn.disabled = nameInput.value.trim() === '';
+        }
+
+        // Accept terms and start the actual game
+        function acceptTerms() {
+            const termsScreen = document.getElementById('terms-screen');
+            termsScreen.classList.remove('active');
+            actuallyStartGame();
+        }
+
+        // Skip game and go directly to Valentine screen
+        function skipToValentine() {
+            // Stop the game
+            if (gameState.isPlaying) {
+                gameState.isPlaying = false;
+                if (gameState.personMoverInterval) {
+                    clearInterval(gameState.personMoverInterval);
+                }
+            }
+            
+            // Stop background music
+            const bgMusic = document.getElementById('background-music');
+            bgMusic.pause();
+            bgMusic.currentTime = 0;
+            
+            // Hide game container and show win screen
+            document.getElementById('game-container').style.display = 'none';
+            const winScreen = document.getElementById('win-screen');
+            winScreen.style.display = 'flex';
+            winScreen.classList.add('active');
+            
+            // Hide custom cursor
+            customCursor.style.display = 'none';
+        }
+
+        // Handle Valentine's response - NO button
+        function rejectValentine() {
+            alert("I knew you'll click this first, but unfortunately you already agreed to accept the reward for winning this game, so you HAVE to choose Yes!!!!");
+        }
+
+        // Handle Valentine's response - YES button
+        function acceptValentine() {
+            const acceptanceScreen = document.getElementById('acceptance-screen');
+            const winVideo = document.getElementById('win-video');
+            
+            // Hide custom cursor
+            customCursor.style.display = 'none';
+            
+            // Show the acceptance screen and play the video
+            acceptanceScreen.classList.add('visible');
+            winVideo.play();
+            
+            // Request fullscreen on the video
+            if (winVideo.requestFullscreen) {
+                winVideo.requestFullscreen();
+            } else if (winVideo.webkitRequestFullscreen) {
+                winVideo.webkitRequestFullscreen();
+            } else if (winVideo.msRequestFullscreen) {
+                winVideo.msRequestFullscreen();
+            }
+        }
+
+        // Custom cursor tracking
+        const customCursor = document.getElementById('custom-cursor');
+        document.addEventListener('mousemove', (e) => {
+            if (gameState.isPlaying) {
+                customCursor.style.left = e.clientX + 'px';
+                customCursor.style.top = e.clientY + 'px';
+                customCursor.style.display = 'block';
+            }
+        });
+
+        document.addEventListener('mouseleave', () => {
+            customCursor.style.display = 'none';
+        });
+    </script>
+</body>
+</html>
